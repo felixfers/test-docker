@@ -9,25 +9,24 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: 1. Descargar código del repo
+      - name: 1. Descargar codigo
         uses: actions/checkout@v4
 
-      - name: 2. Levantar la orquesta (Compose)
+      - name: 2. Levantar con Docker Compose
         run: |
-          # Cambiamos 'docker-compose' por 'docker compose'
           docker compose up -d --build
-          echo "Esperando a que los servicios inicien..."
-          sleep 15 
+          echo "Esperando a que los servicios se estabilicen..."
+          sleep 30
 
-      - name: 3. Test de salud - Frontend (Nginx)
-        run: |
-          curl -I http://localhost:8080 | grep "200 OK"
-          echo "✅ Frontend respondiendo en puerto 8080"
+      - name: 3. Debug - Ver estado de contenedores
+        run: docker compose ps
 
-      - name: 4. Test de salud - Backend (Python API)
-        run: |
-          curl -s http://localhost:5000/datos | grep "online"
-          echo "✅ Backend respondiendo en puerto 5000"
+      - name: 4. Test Frontend
+        run: curl -v http://localhost:8080 | grep "200 OK"
 
-      - name: 5. Limpieza
-        run: docker compose down
+      - name: 5. Test Backend
+        run: curl -s http://localhost:5000/datos | grep "online"
+
+      - name: 6. Ver logs si algo fallo
+        if: failure()
+        run: docker compose logs
