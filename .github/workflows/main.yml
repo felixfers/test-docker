@@ -10,18 +10,6 @@ jobs:
 
     steps:
       - name: 1. Descargar código del repo
-name: Multi-Tier CI Pipeline
-
-on:
-  push:
-    branches: [ master, main ]
-
-jobs:
-  test-infrastructure:
-    runs-on: ubuntu-latest
-
-    steps:
-      - name: 1. Descargar código del repo
         uses: actions/checkout@v4
 
       - name: 2. Levantar la orquesta (Compose)
