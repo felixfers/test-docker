@@ -37,7 +37,8 @@ jobs:
         run: |
           # El nombre de la imagen local debe coincidir con lo que generó compose
           # Por defecto es: nombre-del-directorio-frontend
-          docker tag static-web-automator-frontend:latest ${{ secrets.DOCKER_USERNAME }}/test-docker:latest
+          # Usamos el nombre que definimos en el compose
+          docker tag mi-frontend-temp:latest ${{ secrets.DOCKER_USERNAME }}/test-docker:latest
           docker push ${{ secrets.DOCKER_USERNAME }}/test-docker:latest
 
       - name: 7. Limpiar

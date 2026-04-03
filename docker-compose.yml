@@ -1,7 +1,7 @@
-version: '3.8'
 services:
   frontend:
     build: .
+    image: mi-frontend-temp
     ports:
       - "8080:80"
     depends_on:
