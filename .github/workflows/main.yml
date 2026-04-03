@@ -15,28 +15,30 @@ jobs:
       - name: 2. Levantar con Docker Compose
         run: |
           docker compose up -d --build
-          echo "Esperando a que los servicios se estabilicen..."
           sleep 20
 
       - name: 3. Test Frontend (Status 200)
         run: |
           STATUS=$(curl -s -o /dev/null -w "%{http_code}" http://localhost:8080)
-          if [ $STATUS -eq 200 ]; then
-            echo "✅ Frontend OK: HTTP $STATUS"
-          else
-            echo "❌ Frontend FALLÓ: HTTP $STATUS"
-            exit 1
-          fi
+          if [ $STATUS -eq 200 ]; then echo "✅ OK"; else exit 1; fi
 
       - name: 4. Test Backend (JSON Check)
         run: |
           RESPONSE=$(curl -s http://localhost:5000/datos)
-          if echo "$RESPONSE" | grep -q "online"; then
-            echo "✅ Backend OK: Datos recibidos"
-          else
-            echo "❌ Backend FALLÓ: Respuesta inesperada -> $RESPONSE"
-            exit 1
-          fi
+          if echo "$RESPONSE" | grep -q "online"; then echo "✅ OK"; else exit 1; fi
 
-      - name: 5. Limpiar
+      - name: 5. Login a Docker Hub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_PASSWORD }}
+
+      - name: 6. Push de imágenes
+        run: |
+          # El nombre de la imagen local debe coincidir con lo que generó compose
+          # Por defecto es: nombre-del-directorio-frontend
+          docker tag static-web-automator-frontend:latest ${{ secrets.DOCKER_USERNAME }}/test-docker:latest
+          docker push ${{ secrets.DOCKER_USERNAME }}/test-docker:latest
+
+      - name: 7. Limpiar
         run: docker compose down
