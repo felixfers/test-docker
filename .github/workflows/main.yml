@@ -10,12 +10,24 @@ jobs:
 
     steps:
       - name: 1. Descargar código del repo
+name: Multi-Tier CI Pipeline
+
+on:
+  push:
+    branches: [ master, main ]
+
+jobs:
+  test-infrastructure:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: 1. Descargar código del repo
         uses: actions/checkout@v4
 
       - name: 2. Levantar la orquesta (Compose)
         run: |
-          # El flag -d es para que corra en segundo plano (detached)
-          docker-compose up -d --build
+          # Cambiamos 'docker-compose' por 'docker compose'
+          docker compose up -d --build
           echo "Esperando a que los servicios inicien..."
           sleep 15 
 
@@ -26,9 +38,8 @@ jobs:
 
       - name: 4. Test de salud - Backend (Python API)
         run: |
-          # Verificamos que el JSON contenga la palabra 'online'
           curl -s http://localhost:5000/datos | grep "online"
           echo "✅ Backend respondiendo en puerto 5000"
 
       - name: 5. Limpieza
-        run: docker-compose down
+        run: docker compose down
