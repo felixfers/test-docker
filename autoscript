@@ -1,0 +1,23 @@
+#!/bin/bash
+# ~/docker-wsl-setup.sh
+
+# Verificar si Docker Desktop está corriendo
+if [ ! -e "/mnt/wsl/docker-desktop/shared-sockets/guest-services/docker.sock" ]; then
+    echo "❌ Docker socket no encontrado. ¿Docker Desktop está corriendo en Windows?"
+    echo "   Verifica que:"
+    echo "   1. Docker Desktop esté abierto"
+    echo "   2. WSL Integration esté habilitado para Arch"
+    exit 1
+fi
+
+# Crear enlace simbólico
+sudo mkdir -p /var/run
+sudo ln -sf /mnt/wsl/docker-desktop/shared-sockets/guest-services/docker.sock /var/run/docker.sock
+
+# Verificar que funciona
+if docker ps &>/dev/null; then
+    echo "✅ Docker configurado correctamente"
+else
+    echo "⚠️  Docker no responde. Verifica que Docker Desktop esté funcionando"
+    exit 1
+fi

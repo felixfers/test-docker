@@ -1,0 +1,26 @@
+name: Docker Build Check
+
+on:
+  push:
+    branches: [ master, main ]  # Se activa cuando subes algo a master
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest  # GitHub nos presta una máquina virtual con Linux
+
+    steps:
+      - name: Checkout del código
+        uses: actions/checkout@v4  # Paso 1: Descargar tu código en esa máquina
+
+      - name: Build de la imagen Docker
+        run: |
+          docker build -t mi-web-test:${{ github.sha }} .
+          echo "✅ La imagen se construyó correctamente"
+
+      - name: Test de salud del contenedor
+        run: |
+          # Levantamos el contenedor para ver si explota o funciona
+          docker run -d --name test-container -p 8080:80 mi-web-test:${{ github.sha }}
+          sleep 5 # Damos tiempo a Nginx para arrancar
+          curl -I http://localhost:8080 | grep "200 OK"
+          echo "🔥 Test pasado: El servidor responde"
