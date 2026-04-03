@@ -1,22 +1,21 @@
 #!/bin/bash
 
+LOG_FILE="deploy_history.log"
 DESTINO="/var/www/html"
-ORIGEN=$(pwd)
 
-echo "🚀 Iniciando despliegue..."
-sudo cp $ORIGEN/index.html $DESTINO/index.html
-echo "✅ Archivos copiados."
+# Función para loggear con fecha
+log_message() {
+    echo "$(date '+%Y-%m-%d %H:%M:%S') - $1" >> $LOG_FILE
+}
 
-# --- NUEVA SECCIÓN: HEALTH CHECK ---
-echo "🧐 Verificando la salud del sitio..."
-
-# curl -s (silencioso) -o /dev/null (no queremos ver el HTML) 
-# -w "%{http_code}" (queremos ver el código de estado HTTP, ej. 200)
-ESTADO=$(curl -s -o /dev/null -w "%{http_code}" http://localhost)
-
-if [ $ESTADO -eq 200 ]; then
-    echo "🔥 ¡ÉXITO! El sitio está online (Código 200)."
+echo "🚀 Desplegando..."
+if sudo cp index.html $DESTINO/index.html; then
+    log_message "SUCCESS: Despliegue realizado correctamente."
 else
-    echo "❌ ERROR: El sitio devolvió código $ESTADO. Revisa Nginx."
+    log_message "ERROR: Falló la copia de archivos."
     exit 1
 fi
+
+# Health check
+ESTADO=$(curl -s -o /dev/null -w "%{http_code}" http://localhost)
+log_message "HEALTH CHECK: Código $ESTADO"
